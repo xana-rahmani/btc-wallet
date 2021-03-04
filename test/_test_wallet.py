@@ -1,6 +1,6 @@
-from bitcoin import SelectParams
 from wallet import Wallet
-from wallet import Network
+from btc import constants
+
 
 
 Mainnet_private_keys = [
@@ -12,25 +12,28 @@ Testnet_private_keys = [
 ]
 
 def print_network(network):
-    print("\n\t\t##############################\n \t\t\t   {}\n \t\t##############################\n".format(network))
+    print("\n\t\t##############################\n \t\t\t\t   {}\n \t\t##############################\n".format(network))
 
 
 print_network("Mainnet")
+constants.set_mainnet()
 for prv_key in Mainnet_private_keys:
-    wallet = Wallet(private_key=prv_key, network=Network.Mainnet)
+    wallet = Wallet(private_key=prv_key, network=constants.net)
     print('private key: {}'.format(wallet.private_key))
-    print('public key: {}'.format(wallet.public_key))
-    print('\tP2PKH address: {}'.format(wallet.P2PKH_address()))
-    print('\tP2SH  address: {}'.format(wallet.P2SH_address()))
+    print('public  key: {}'.format(wallet.public_key))
+    print('\tP2PKH  address: {}'.format(wallet.public_key_to_address(txin_type='p2pkh')))
+    print('\tP2WPKH address: {}'.format(wallet.public_key_to_address(txin_type='p2wpkh')))
+    print('\tP2WPKH-P2SH address: {}'.format(wallet.public_key_to_address(txin_type='p2wpkh-p2sh')))
     print(10*"----------")
 
 
 print_network("Testnet")
-SelectParams('testnet')
+constants.set_testnet()
 for t_prv_key in Testnet_private_keys:
-    wallet = Wallet(private_key=t_prv_key, network=Network.Testnet)
+    wallet = Wallet(private_key=t_prv_key, network=constants.net)
     print('private key: {}'.format(wallet.private_key))
-    print('public key: {}'.format(wallet.public_key))
-    print('\tP2PKH address: {}'.format(wallet.P2PKH_address()))
-    print('\tP2SH  address: {}'.format(wallet.P2SH_address()))
+    print('public  key: {}'.format(wallet.public_key))
+    print('\tP2PKH  address: {}'.format(wallet.public_key_to_address(txin_type='p2pkh')))
+    print('\tP2WPKH address: {}'.format(wallet.public_key_to_address(txin_type='p2wpkh')))
+    print('\tP2WPKH-P2SH address: {}'.format(wallet.public_key_to_address(txin_type='p2wpkh-p2sh')))
     print(10*"----------")
