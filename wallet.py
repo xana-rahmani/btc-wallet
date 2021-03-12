@@ -132,7 +132,7 @@ class HDWallet:
         depth = b'\x00'  # 1 bytes: How many derivations deep this extended key is from the master key.
 
         # The first 4 bytes of the hash160 of the parent’s public key. This helps to identify the parent later.
-        parentFingerprint = hash_160(bfh(self.x_pub[:64]))[0:4]
+        parentFingerprint = b'\x00\x00\x00\x00'  # hash_160(bfh(self.x_pub[:64]))[0:4]
         childNumber = b'\x00\x00\x00\x00'  # The index number of this child from the parent.
         chain_code_bytes = bytes.fromhex(self.chain_code)
         key = b'\x00' + bytes.fromhex(self.x_prv[:64])
