@@ -1,10 +1,10 @@
-from btc.bitcoin import (public_key_to_p2pkh, public_key_to_p2wpkh, public_key_to_p2wpkh_p2sh)
+from btc.bitcoin import (public_key_to_p2pkh, public_key_to_p2wpkh, public_key_to_p2wpkh_p2sh,
+                         bfh, hash_160, sha256, base_58_encode)
 from bitcoin.core import x
 from bitcoin.wallet import CBitcoinSecret
 from btc import constants
 import hmac
 import hashlib
-
 
 Secp256k1_order = 'fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141'
 """
@@ -35,7 +35,6 @@ class Wallet:
             raise NotImplementedError(txin_type)
 
 
-# TODO:  Serialization
 class HDWallet:
     def __init__(self, seed: hex):
         """
@@ -114,3 +113,30 @@ class HDWallet:
         """
         pass
 
+    def serialization_xprv(self):
+        version = bytes.fromhex('0488ade4')  # 4 bytes: Places “xprv” 0488ade4 or “xpub” 0488b21e at the start.
+        depth = b'\x00'  # 1 bytes: How many derivations deep this extended key is from the master key.
+
+        # The first 4 bytes of the hash160 of the parent’s public key. This helps to identify the parent later.
+        parentFingerprint = hash_160(bfh(self.x_pub[:64]))[0:4]
+        childNumber = b'\x00\x00\x00\x00'  # The index number of this child from the parent.
+        chain_code_bytes = bytes.fromhex(self.chain_code)
+        key = b'\x00' + bytes.fromhex(self.x_prv[:64])
+        serialized = version + depth + parentFingerprint + childNumber + chain_code_bytes + key
+        check_sum = sha256(sha256(serialized))[0:4]
+
+        return base_58_encode(serialized + check_sum)
+
+    def serialization_xpub(self):
+        version = bytes.fromhex('0488b21e')  # 4 bytes: Places “xprv” 0488ade4 or “xpub” 0488b21e at the start.
+        depth = b'\x00'  # 1 bytes: How many derivations deep this extended key is from the master key.
+
+        # The first 4 bytes of the hash160 of the parent’s public key. This helps to identify the parent later.
+        parentFingerprint = hash_160(bfh(self.x_pub[:64]))[0:4]
+        childNumber = b'\x00\x00\x00\x00'  # The index number of this child from the parent.
+        chain_code_bytes = bytes.fromhex(self.chain_code)
+        key = b'\x00' + bytes.fromhex(self.x_prv[:64])
+        serialized = version + depth + parentFingerprint + childNumber + chain_code_bytes + key
+        check_sum = sha256(sha256(serialized))[0:4]
+
+        return base_58_encode(serialized + check_sum)
